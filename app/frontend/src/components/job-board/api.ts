@@ -2,7 +2,7 @@ const API_URL = 'http://localhost:5000';
 
 export const jobsApi = {
   getJobs: async () => {
-    const response = await fetch(`${API_URL}/jobs`, {
+    const response = await fetch(`${API_URL}/api/jobs`, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`,
       },
@@ -11,7 +11,7 @@ export const jobsApi = {
   },
 
   getJob: async (jobId: number) => {
-    const response = await fetch(`${API_URL}/jobs/${jobId}`, {
+    const response = await fetch(`${API_URL}/api/jobs/${jobId}`, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`,
       },
@@ -20,7 +20,7 @@ export const jobsApi = {
   },
 
   applyForJob: async (jobId: number) => {
-    const response = await fetch(`${API_URL}/jobs/${jobId}/apply`, {
+    const response = await fetch(`${API_URL}/api/jobs/${jobId}/apply`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`,

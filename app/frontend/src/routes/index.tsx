@@ -9,6 +9,7 @@ import Feed from '../components/feed/Feed';
 import JobList from '../components/job-board/JobList';
 import MessageList from '../components/messaging/MessageList';
 
+// Suppress React Router v7 warning by using future flag
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -39,6 +40,10 @@ export const router = createBrowserRouter([
     element: <PostList />,
   },
   {
+    path: '/feed',
+    element: <Feed />,
+  },
+  {
     path: '/jobs',
     element: <JobList />,
   },
@@ -46,4 +51,8 @@ export const router = createBrowserRouter([
     path: '/messages',
     element: <MessageList />,
   },
-]); 
+], {
+  future: {
+    v7_startTransition: true,
+  } as any,
+}); 

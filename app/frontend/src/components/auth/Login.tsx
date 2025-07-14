@@ -1,32 +1,39 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { authApi } from './api';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
     if (!email || !password) {
       setError('All fields are required.');
       return;
     }
     setLoading(true);
     try {
-      const res = await authApi.login({ email, password });
-      if (res && res.token) {
-        localStorage.setItem('token', res.token);
-        navigate('/profile');
+      const res = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (res.ok && data.token) {
+        localStorage.setItem('token', data.token);
+        setSuccess('Login successful!');
+        setTimeout(() => navigate('/profile'), 1000);
       } else {
-        setError(res?.message || 'Invalid credentials');
+        setError(data.message || 'Login failed');
       }
     } catch (err) {
-      setError('Login failed. Please try again.');
+      setError('Network error');
     } finally {
       setLoading(false);
     }
@@ -58,6 +65,7 @@ const Login: React.FC = () => {
             />
           </div>
           {error && <div className="text-red-500 text-sm">{error}</div>}
+          {success && <div className="text-green-600 text-sm">{success}</div>}
           <button
             type="submit"
             className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-50"
@@ -75,4 +83,4 @@ const Login: React.FC = () => {
   );
 };
 
-export default Login;
+export default Login; 

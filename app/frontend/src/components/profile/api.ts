@@ -2,7 +2,7 @@ const API_URL = 'http://localhost:5000';
 
 export const profileApi = {
   getProfile: async () => {
-    const response = await fetch(`${API_URL}/profile`, {
+    const response = await fetch(`${API_URL}/api/profile`, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`,
       },
@@ -11,7 +11,7 @@ export const profileApi = {
   },
 
   updateProfile: async (profileData: any) => {
-    const response = await fetch(`${API_URL}/profile`, {
+    const response = await fetch(`${API_URL}/api/profile`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
