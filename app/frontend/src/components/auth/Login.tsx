@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 const Login: React.FC = () => {
-  const [email, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState(''); // username or email
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -13,7 +13,7 @@ const Login: React.FC = () => {
     e.preventDefault();
     setError('');
     setSuccess('');
-    if (!email || !password) {
+    if (!identifier || !password) {
       setError('All fields are required.');
       return;
     }
@@ -22,7 +22,7 @@ const Login: React.FC = () => {
       const res = await fetch('http://localhost:5000/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ username: identifier, email: identifier, password })
       });
       const data = await res.json();
       if (res.ok && data.token) {
@@ -45,13 +45,14 @@ const Login: React.FC = () => {
         <h2 className="text-3xl font-bold text-center text-gray-900">Login</h2>
         <form className="space-y-6" onSubmit={handleSubmit}>
           <div>
-            <label className="block text-gray-700">Email</label>
+            <label className="block text-gray-700">Username or Email</label>
             <input
-              type="email"
+              type="text"
               className="mt-1 w-full border rounded px-3 py-2"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
+              value={identifier}
+              onChange={e => setIdentifier(e.target.value)}
               required
+              placeholder="Enter your username or email"
             />
           </div>
           <div>
