@@ -4,37 +4,53 @@ from config import Config
 from dotenv import load_dotenv
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
+from flask_login import LoginManager
 from extensions import db
+import os
 
-# Load environment variables
-load_dotenv()
+def create_app():
+    # Load environment variables
+    load_dotenv()
 
-# Create Flask app
-app = Flask(__name__)
-app.config.from_object(Config)
-CORS(app, origins=["http://localhost:5173"])
-db.init_app(app)
-migrate = Migrate(app, db)
-jwt = JWTManager(app)
+    app = Flask(__name__)
+    app.config.from_object(Config)
+    CORS(app, origins=["http://localhost:5173", "http://localhost:5174"])
+    db.init_app(app)
+    migrate = Migrate(app, db)
+    jwt = JWTManager(app)
 
-# Import models after initializing db and migrate
-from models.user import User
-from models.profile import Profile, Skill, Experience, Education
+    # --- Flask-Login Setup ---
+    login_manager = LoginManager()
+    login_manager.init_app(app)
+    login_manager.login_view = 'auth.login'
 
-# Import and register blueprints
-from api.auth import auth_bp, limiter
-limiter.init_app(app)
-app.register_blueprint(auth_bp)
+    from models.user import User
+    @login_manager.user_loader
+    def load_user(user_id):
+        return User.query.get(int(user_id))
 
-def setup_database():
-    """Setup database tables"""
-    with app.app_context():
+    # Import models after initializing db and migrate
+    from models.profile import Profile, Skill, Experience, Education
+    from models.post import Post, PostLike
+
+    # Import and register blueprints
+    from api.auth import auth_bp, limiter
+    from api.profile import profile_bp
+    from api.posts import posts_bp
+
+    limiter.init_app(app)
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(profile_bp)
+    app.register_blueprint(posts_bp)
+
+    @app.before_first_request
+    def setup_database():
         db.create_all()
         print("✅ Database tables created successfully!")
 
-# Expose 'app' at module level for Flask CLI
-# (No need for create_app() unless using app factory pattern)
+    return app
+
+app = create_app()
 
 if __name__ == '__main__':
-    setup_database()
     app.run(debug=True) 
