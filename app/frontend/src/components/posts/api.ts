@@ -95,7 +95,12 @@ export const postsApi = {
     });
     
     if (!response.ok) {
-      const error = await response.json();
+      let error;
+      try {
+        error = await response.json();
+      } catch (e) {
+        throw new Error('Failed to upload media (non-JSON error response)');
+      }
       throw new Error(error.error || 'Failed to upload media');
     }
     

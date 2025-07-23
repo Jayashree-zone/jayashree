@@ -14,7 +14,8 @@ def create_app():
 
     app = Flask(__name__)
     app.config.from_object(Config)
-    CORS(app, origins=["http://localhost:5173", "http://localhost:5174"])
+    # Enable CORS for local frontend ports with credentials support
+    CORS(app, origins=["http://localhost:5173", "http://localhost:5174"], supports_credentials=True)
     db.init_app(app)
     migrate = Migrate(app, db)
     jwt = JWTManager(app)
@@ -28,6 +29,12 @@ def create_app():
     @login_manager.user_loader
     def load_user(user_id):
         return User.query.get(int(user_id))
+
+    # Add unauthorized handler for API endpoints
+    from flask import jsonify
+    @login_manager.unauthorized_handler
+    def unauthorized():
+        return jsonify({'error': 'Unauthorized'}), 401
 
     # Import models after initializing db and migrate
     from models.profile import Profile, Skill, Experience, Education
@@ -43,14 +50,12 @@ def create_app():
     app.register_blueprint(profile_bp)
     app.register_blueprint(posts_bp)
 
-    @app.before_first_request
-    def setup_database():
-        db.create_all()
-        print("✅ Database tables created successfully!")
-
     return app
 
 app = create_app()
 
 if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
+        print("✅ Database tables created successfully!")
     app.run(debug=True) 
