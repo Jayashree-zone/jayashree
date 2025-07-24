@@ -7,6 +7,8 @@ from flask_jwt_extended import JWTManager
 from flask_login import LoginManager
 from extensions import db
 import os
+from flask import request
+
 
 def create_app():
     # Load environment variables
@@ -14,8 +16,15 @@ def create_app():
 
     app = Flask(__name__)
     app.config.from_object(Config)
-    # Enable CORS for local frontend ports with credentials support
-    CORS(app, origins=["http://localhost:5173", "http://localhost:5174"], supports_credentials=True)
+    # Enable CORS for all /api/* routes with credentials support and allow all methods/headers
+    CORS(app, resources={r"/api/*": {"origins": ["http://localhost:5173", "http://localhost:5174"], "supports_credentials": True, "allow_headers": "*", "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"]}}, supports_credentials=True)
+
+    # Log CORS preflight requests for debugging
+    @app.before_request
+    def log_options_requests():
+        if request.method == 'OPTIONS':
+            print(f"CORS Preflight: {request.method} {request.path} Headers: {dict(request.headers)}")
+
     db.init_app(app)
     migrate = Migrate(app, db)
     jwt = JWTManager(app)
